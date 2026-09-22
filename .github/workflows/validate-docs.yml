@@ -1,0 +1,59 @@
+name: Validate Part 1 Documentation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check /docs folder exists
+        run: |
+          if [ ! -d "docs" ]; then
+            echo "::error::Missing /docs folder"
+            exit 1
+          fi
+
+      - name: Check ERD image is present
+        run: |
+          if ! ls docs/erd.* 1> /dev/null 2>&1; then
+            echo "::error::Missing ERD image (docs/erd.png or docs/erd.pdf)"
+            exit 1
+          fi
+
+      - name: Check API endpoint plan is present
+        run: |
+          if [ ! -f "docs/api-endpoint-plan.md" ] && [ ! -f "docs/api-endpoint-plan.pdf" ]; then
+            echo "::error::Missing API endpoint plan (docs/api-endpoint-plan.md or .pdf)"
+            exit 1
+          fi
+
+      - name: Check SQL script is present
+        run: |
+          if [ ! -f "docs/raceday-schema.sql" ]; then
+            echo "::error::Missing SQL script (docs/raceday-schema.sql)"
+            exit 1
+          fi
+
+      - name: Check README exists
+        run: |
+          if [ ! -f "README.md" ]; then
+            echo "::error::Missing README.md"
+            exit 1
+          fi
+
+      - name: Confirm SQL script has no obvious placeholder markers
+        run: |
+          if grep -qi "TODO" docs/raceday-schema.sql; then
+            echo "::error::SQL script still contains TODO markers"
+            exit 1
+          fi
+
+      - name: Summary
+        run: echo "All required Part 1 documentation is present."
