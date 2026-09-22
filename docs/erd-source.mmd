@@ -1,0 +1,80 @@
+erDiagram
+    USERS ||--o{ EVENTS : "organises"
+    USERS ||--o{ ENROLMENTS : "enters as participant"
+    USERS ||--o{ RESULTS : "captures as organiser"
+    EVENTS ||--o{ CATEGORIES : "offers"
+    EVENTS ||--o{ WEATHER_SNAPSHOTS : "has forecast history"
+    CATEGORIES ||--o{ ENROLMENTS : "receives"
+    CATEGORIES ||--|| ROUTES : "has"
+    ENROLMENTS ||--o| RESULTS : "produces"
+
+    USERS {
+        int UserId PK
+        nvarchar FullName
+        nvarchar Email UK
+        nvarchar PasswordHash
+        nvarchar Role "Organiser or Participant"
+        nvarchar PhoneNumber
+        datetime2 CreatedAt
+    }
+
+    EVENTS {
+        int EventId PK
+        int OrganiserId FK
+        nvarchar Name
+        nvarchar Description
+        nvarchar DisciplineType "Running, Cycling, Walking"
+        date EventDate
+        time StartTime
+        nvarchar Province
+        nvarchar Venue
+        nvarchar Status "Draft, Published, Cancelled, Completed"
+        datetime2 CreatedAt
+    }
+
+    CATEGORIES {
+        int CategoryId PK
+        int EventId FK
+        nvarchar Name
+        decimal DistanceKm
+        decimal EntryFee
+        int MaxParticipants
+    }
+
+    ROUTES {
+        int RouteId PK
+        int CategoryId FK,UK
+        nvarchar StartPoint
+        nvarchar EndPoint
+        int ElevationGainM
+        nvarchar MapUrl
+    }
+
+    WEATHER_SNAPSHOTS {
+        int WeatherSnapshotId PK
+        int EventId FK
+        datetime2 RecordedAt
+        decimal TemperatureC
+        decimal WindSpeedKmh
+        nvarchar ConditionDescription
+        nvarchar Source
+    }
+
+    ENROLMENTS {
+        int EnrolmentId PK
+        int ParticipantId FK
+        int CategoryId FK
+        nvarchar BibNumber
+        datetime2 EnrolmentDate
+        nvarchar Status "Confirmed or Cancelled"
+    }
+
+    RESULTS {
+        int ResultId PK
+        int EnrolmentId FK,UK
+        int CapturedByUserId FK
+        time FinishTime
+        int Position
+        nvarchar Status "Finished, DNF, DSQ"
+        datetime2 CapturedAt
+    }
