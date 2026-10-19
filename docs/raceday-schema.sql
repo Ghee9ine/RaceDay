@@ -23,6 +23,7 @@ GO
 -- ==========================================================================
 -- Table: Users
 -- Holds both Organisers and Participants, distinguished by the Role column.
+-- ProfilePictureUrl is nullable and reserved for Part 3 (Azure Blob Storage).
 -- ==========================================================================
 CREATE TABLE Users (
     UserId          INT IDENTITY(1,1)   NOT NULL,
@@ -31,6 +32,7 @@ CREATE TABLE Users (
     PasswordHash    NVARCHAR(256)       NOT NULL,
     Role            NVARCHAR(20)        NOT NULL,
     PhoneNumber     NVARCHAR(20)        NULL,
+    ProfilePictureUrl NVARCHAR(500)     NULL,
     CreatedAt       DATETIME2           NOT NULL DEFAULT SYSUTCDATETIME(),
     CONSTRAINT PK_Users PRIMARY KEY (UserId),
     CONSTRAINT UQ_Users_Email UNIQUE (Email),
@@ -41,6 +43,7 @@ GO
 -- ==========================================================================
 -- Table: Events
 -- Each event is owned by exactly one Organiser (one-to-many: Users -> Events).
+-- BannerImageUrl is nullable and reserved for Part 3 (Azure Blob Storage).
 -- ==========================================================================
 CREATE TABLE Events (
     EventId         INT IDENTITY(1,1)   NOT NULL,
@@ -53,6 +56,7 @@ CREATE TABLE Events (
     Province        NVARCHAR(50)        NULL,
     Venue           NVARCHAR(200)       NULL,
     Status          NVARCHAR(20)        NOT NULL DEFAULT 'Published',
+    BannerImageUrl  NVARCHAR(500)       NULL,
     CreatedAt       DATETIME2           NOT NULL DEFAULT SYSUTCDATETIME(),
     CONSTRAINT PK_Events PRIMARY KEY (EventId),
     CONSTRAINT FK_Events_Organiser FOREIGN KEY (OrganiserId) REFERENCES Users(UserId),
@@ -64,6 +68,8 @@ GO
 -- ==========================================================================
 -- Table: Categories
 -- Each event offers many categories (one-to-many: Events -> Categories).
+-- AgeGroup is nullable and distinct from distance (e.g. Open, Under 20,
+-- Senior, Veteran), so age-based and distance-based categories both fit.
 -- ==========================================================================
 CREATE TABLE Categories (
     CategoryId      INT IDENTITY(1,1)   NOT NULL,
@@ -72,6 +78,7 @@ CREATE TABLE Categories (
     DistanceKm      DECIMAL(6,2)        NOT NULL,
     EntryFee        DECIMAL(8,2)        NOT NULL DEFAULT 0,
     MaxParticipants INT                 NULL,
+    AgeGroup        NVARCHAR(30)        NULL,
     CONSTRAINT PK_Categories PRIMARY KEY (CategoryId),
     CONSTRAINT FK_Categories_Event FOREIGN KEY (EventId) REFERENCES Events(EventId),
     CONSTRAINT UQ_Categories_EventName UNIQUE (EventId, Name),
@@ -159,29 +166,40 @@ GO
 -- Seed data
 -- ==========================================================================
 
--- Organisers and Participants (2 of each minimum)
+-- Organisers and Participants (2 of each minimum). Password for every
+-- seeded user is "RaceDay@2026", hashed with ASP.NET Core's
+-- PasswordHasher<User> (PBKDF2/HMACSHA256, v3 format) so a database built
+-- from this script can log in through the Part 2 API, not just via EF seed.
 INSERT INTO Users (FullName, Email, PasswordHash, Role, PhoneNumber) VALUES
-    ('Thandiwe Mokoena',  'thandiwe.mokoena@raceday.co.za', 'HASHED_PLACEHOLDER_1', 'Organiser',   '0821234567'),
-    ('Johan van der Merwe','johan.vdm@raceday.co.za',        'HASHED_PLACEHOLDER_2', 'Organiser',   '0837654321'),
-    ('Lindiwe Dlamini',   'lindiwe.dlamini@example.com',    'HASHED_PLACEHOLDER_3', 'Participant', '0731112222'),
-    ('Ryan Naidoo',       'ryan.naidoo@example.com',        'HASHED_PLACEHOLDER_4', 'Participant', '0723334444');
+    ('Thandiwe Mokoena',  'thandiwe.mokoena@raceday.co.za', 'AQAAAAIAAYagAAAAEN/igyvthei00bw20ou/nQjhb5lhjkbGJRJZgARHm7rWq1irGZmpfNAelwntf31FUg==', 'Organiser',   '0821234567'),
+    ('Johan van der Merwe','johan.vdm@raceday.co.za',        'AQAAAAIAAYagAAAAEHRth9G5/D9pTe1DYKMCCCECWo+VQcj5BXBf1HEbVn+8rH03+dvVNbht0LzhwU0iqA==', 'Organiser',   '0837654321'),
+    ('Lindiwe Dlamini',   'lindiwe.dlamini@example.com',    'AQAAAAIAAYagAAAAEHXXmr59UQXdvNs3XXfu7ZFqnmHQKxbMGaqunyd7Hy/fvXOVzTa8h4tRnzkKvsJ7CQ==', 'Participant', '0731112222'),
+    ('Ryan Naidoo',       'ryan.naidoo@example.com',        'AQAAAAIAAYagAAAAEELtWjuh3P65EEQYZCd4C1Wkmy55hEFWwtK7YV1oR7GpT2RqsiXHVozafFD2kBATdQ==', 'Participant', '0723334444');
 GO
 
--- Events (3 minimum), owned by the two organisers above
+-- Events: 3 already-run events (dated earlier in 2026, so Completed rather
+-- than Published - an upcoming-events browse should not return them) plus
+-- one genuinely upcoming Published event for "browse upcoming events" to
+-- have something to return.
 INSERT INTO Events (OrganiserId, Name, Description, DisciplineType, EventDate, StartTime, Province, Venue, Status) VALUES
-    (1, 'Pietermaritzburg to Durban Classic', 'Ultramarathon following the traditional Comrades-style route.', 'Running', '2026-06-14', '05:30:00', 'KwaZulu-Natal', 'Pietermaritzburg City Hall', 'Published'),
-    (1, 'Cape Peninsula Cycle Tour',          'Scenic road cycling event around the Cape Peninsula.',         'Cycling', '2026-03-08', '06:00:00', 'Western Cape',   'Grand Parade, Cape Town', 'Published'),
-    (2, 'Soweto Community Fun Walk',          'Family-friendly charity walk through Soweto.',                  'Walking', '2026-04-19', '07:00:00', 'Gauteng',        'Orlando Stadium', 'Published');
+    (1, 'Pietermaritzburg to Durban Classic', 'Ultramarathon following the traditional Comrades-style route.', 'Running', '2026-06-14', '05:30:00', 'KwaZulu-Natal', 'Pietermaritzburg City Hall', 'Completed'),
+    (1, 'Cape Peninsula Cycle Tour',          'Scenic road cycling event around the Cape Peninsula.',         'Cycling', '2026-03-08', '06:00:00', 'Western Cape',   'Grand Parade, Cape Town', 'Completed'),
+    (2, 'Soweto Community Fun Walk',          'Family-friendly charity walk through Soweto.',                  'Walking', '2026-04-19', '07:00:00', 'Gauteng',        'Orlando Stadium', 'Completed'),
+    (2, 'Joburg Night Run',                   'Floodlit night run and fun run around Zoo Lake.',               'Running', '2027-03-13', '19:00:00', 'Gauteng',        'Zoo Lake', 'Published');
 GO
 
--- Categories for each event
-INSERT INTO Categories (EventId, Name, DistanceKm, EntryFee, MaxParticipants) VALUES
-    (1, '87km Ultramarathon', 87.00, 850.00, 5000),
-    (1, '21km Half Marathon', 21.10, 450.00, 2000),
-    (2, '109km Cycle Race',  109.00, 650.00, 3000),
-    (2, '45km Fun Ride',      45.00, 350.00, 1500),
-    (3, '5km Fun Walk',        5.00,   0.00, 1000),
-    (3, '10km Charity Walk',  10.00,  50.00,  800);
+-- Categories for each event. AgeGroup is populated for the new event to
+-- show the feature in use; existing events default to 'Open' since they
+-- were never split by age.
+INSERT INTO Categories (EventId, Name, DistanceKm, EntryFee, MaxParticipants, AgeGroup) VALUES
+    (1, '87km Ultramarathon', 87.00, 850.00, 5000, 'Open'),
+    (1, '21km Half Marathon', 21.10, 450.00, 2000, 'Open'),
+    (2, '109km Cycle Race',  109.00, 650.00, 3000, 'Open'),
+    (2, '45km Fun Ride',      45.00, 350.00, 1500, 'Open'),
+    (3, '5km Fun Walk',        5.00,   0.00, 1000, 'Open'),
+    (3, '10km Charity Walk',  10.00,  50.00,  800, 'Open'),
+    (4, '10km Run',           10.00, 150.00, 1000, 'Open'),
+    (4, '5km Fun Run',         5.00,  80.00, 1500, 'Under 20');
 GO
 
 -- Routes (one per category, at least a representative sample)
