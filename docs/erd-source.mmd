@@ -15,6 +15,7 @@ erDiagram
         nvarchar PasswordHash
         nvarchar Role "Organiser or Participant"
         nvarchar PhoneNumber
+        nvarchar ProfilePictureUrl "nullable, Part 3: Azure Blob Storage"
         datetime2 CreatedAt
     }
 
@@ -29,6 +30,7 @@ erDiagram
         nvarchar Province
         nvarchar Venue
         nvarchar Status "Draft, Published, Cancelled, Completed"
+        nvarchar BannerImageUrl "nullable, Part 3: Azure Blob Storage"
         datetime2 CreatedAt
     }
 
@@ -39,6 +41,7 @@ erDiagram
         decimal DistanceKm
         decimal EntryFee
         int MaxParticipants
+        nvarchar AgeGroup "nullable, e.g. Open, Under 20, Senior, Veteran"
     }
 
     ROUTES {
