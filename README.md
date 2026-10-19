@@ -139,9 +139,13 @@ xUnit tests run the real API in memory through `WebApplicationFactory<Program>`,
 | [validate-docs.yml](.github/workflows/validate-docs.yml) | Checks the `/docs` files, README, solution, and project folders exist, and that the SQL script has no placeholders. |
 | [build-and-test.yml](.github/workflows/build-and-test.yml) | Restores, builds (Release), and runs all tests on every push, then uploads the test results. |
 
-Part 1 green build: _add screenshot_ (`docs/screenshots/ci-green-part1.png`)
+Part 1 green build:
 
-Part 2 green build: _add screenshot_ (`docs/screenshots/ci-green-part2.png`)
+![Validate Repository Structure green build](docs/screenshots/ci-green-part1.png)
+
+Part 2 green build:
+
+![Build and Test green build](docs/screenshots/ci-green-part2.png)
 
 ## Video walkthroughs (unlisted YouTube)
 
