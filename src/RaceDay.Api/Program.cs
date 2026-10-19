@@ -20,6 +20,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // Seeds demo data on first run only (skipped once Users has any rows),
+    // and only in Development - never against a real deployment.
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<RaceDayDbContext>();
+    await DbSeeder.SeedAsync(db);
 }
 
 app.UseHttpsRedirection();
@@ -28,7 +34,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
 
 // Exposes Program to WebApplicationFactory<Program> in the test project.
 public partial class Program { }
