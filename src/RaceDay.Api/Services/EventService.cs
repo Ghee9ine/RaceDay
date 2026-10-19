@@ -36,16 +36,18 @@ public class EventService : IEventService
             query = query.Where(e => e.EventDate <= filter.To);
         }
 
-        // Projected inline (not via the ToSummary helper) so EF Core can
-        // translate the whole thing to one SQL query - a helper method call
-        // inside Select() can't be translated and throws at runtime.
-        return await query
+        // Materialized via Include + a single JOIN-based query, then shaped
+        // into the response DTO in memory - not projected directly in
+        // Select(). Projecting e.Categories as a per-row array requires a
+        // correlated subquery (SQL Server: APPLY), which SQLite's provider
+        // doesn't support at all, so this has to be two steps there.
+        var events = await query
+            .Include(e => e.Categories)
+            .Include(e => e.Organiser)
             .OrderBy(e => e.EventDate)
-            .Select(e => new EventSummaryResponse(
-                e.EventId, e.Name, e.Description, e.DisciplineType, e.EventDate, e.StartTime,
-                e.Province, e.Venue, e.Status, e.BannerImageUrl, e.Organiser.FullName,
-                e.Categories.Select(c => c.DistanceKm).Distinct().OrderBy(d => d).ToArray()))
             .ToListAsync();
+
+        return events.Select(ToSummary).ToList();
     }
 
     public async Task<EventDetailResponse?> GetByIdAsync(int eventId, int? callerUserId)
@@ -173,6 +175,11 @@ public class EventService : IEventService
 
         return ServiceResult<bool>.Success(true);
     }
+
+    private static EventSummaryResponse ToSummary(Event e) => new(
+        e.EventId, e.Name, e.Description, e.DisciplineType, e.EventDate, e.StartTime,
+        e.Province, e.Venue, e.Status, e.BannerImageUrl, e.Organiser.FullName,
+        e.Categories.Select(c => c.DistanceKm).Distinct().OrderBy(d => d).ToArray());
 
     private static EventDetailResponse ToDetail(Event e) => new(
         e.EventId, e.Name, e.Description, e.DisciplineType, e.EventDate, e.StartTime,
