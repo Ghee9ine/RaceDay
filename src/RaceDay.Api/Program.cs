@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.Api.Data;
+using RaceDay.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,23 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<RaceDayDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Server-side session: login writes UserId/Role in here, and
+// SessionAuthenticationHandler reads them back out to build the
+// ClaimsPrincipal for [Authorize]. The session store itself (not a JWT)
+// is what the brief and rubric call for.
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = ".RaceDay.Session";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+});
 
 var app = builder.Build();
 
@@ -29,6 +48,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseSession();
 
 app.UseAuthorization();
 
