@@ -141,7 +141,7 @@ CREATE INDEX [IX_WeatherSnapshots_EventId] ON [WeatherSnapshots] ([EventId]);
 GO
 
 INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-VALUES (N'20261019121830_InitialCreate', N'8.0.11');
+VALUES (N'20261019132254_InitialCreate', N'8.0.11');
 GO
 
 COMMIT;

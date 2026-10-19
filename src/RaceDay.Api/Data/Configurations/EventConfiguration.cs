@@ -17,7 +17,11 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.HasKey(e => e.EventId);
 
         builder.Property(e => e.Name).HasMaxLength(150).IsRequired();
-        builder.Property(e => e.Description).HasColumnType("nvarchar(max)");
+        // No explicit HasColumnType here: a string property with no
+        // HasMaxLength already maps to NVARCHAR(MAX) on SQL Server by
+        // convention. An explicit "nvarchar(max)" column type is SQL
+        // Server-only syntax - SQLite's CREATE TABLE parser requires a
+        // numeric argument in a type's parentheses and throws on "max".
         builder.Property(e => e.DisciplineType).HasMaxLength(20).IsRequired();
         builder.Property(e => e.EventDate).HasColumnType("date").IsRequired();
         builder.Property(e => e.StartTime).HasColumnType("time");

@@ -12,7 +12,7 @@ using RaceDay.Api.Data;
 namespace RaceDay.Api.Migrations
 {
     [DbContext(typeof(RaceDayDbContext))]
-    [Migration("20261019121830_InitialCreate")]
+    [Migration("20261019132254_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
