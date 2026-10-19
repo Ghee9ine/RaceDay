@@ -42,6 +42,9 @@ public class ResultService : IResultService
             FinishTime = request.FinishTime,
             Position = request.Position,
             Status = request.Status,
+            // Set explicitly, not left to the column's SQL Server-only
+            // SYSUTCDATETIME() default - the test suite runs on SQLite.
+            CapturedAt = DateTime.UtcNow,
         };
         _db.Results.Add(result);
         await _db.SaveChangesAsync();

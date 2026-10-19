@@ -101,6 +101,9 @@ public class EventService : IEventService
             Province = request.Province,
             Venue = request.Venue,
             Status = request.Status ?? EventStatuses.Published,
+            // Set explicitly, not left to the column's SQL Server-only
+            // SYSUTCDATETIME() default - the test suite runs on SQLite.
+            CreatedAt = DateTime.UtcNow,
         };
 
         _db.Events.Add(entity);

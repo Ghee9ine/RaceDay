@@ -56,7 +56,9 @@ public class EnrolmentService : IEnrolmentService
         }
         else
         {
-            enrolment = new Enrolment { ParticipantId = participantId, CategoryId = categoryId, Status = EnrolmentStatuses.Confirmed };
+            // EnrolmentDate set explicitly, not left to the column's SQL
+            // Server-only SYSUTCDATETIME() default - the test suite runs on SQLite.
+            enrolment = new Enrolment { ParticipantId = participantId, CategoryId = categoryId, Status = EnrolmentStatuses.Confirmed, EnrolmentDate = DateTime.UtcNow };
             _db.Enrolments.Add(enrolment);
             await _db.SaveChangesAsync();
 

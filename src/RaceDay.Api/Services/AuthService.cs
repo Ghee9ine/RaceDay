@@ -30,6 +30,10 @@ public class AuthService : IAuthService
             Email = request.Email,
             Role = request.Role,
             PhoneNumber = request.PhoneNumber,
+            // Set explicitly rather than relying on the column's
+            // SYSUTCDATETIME() default: that default is SQL Server syntax
+            // and the test suite runs against SQLite, which doesn't have it.
+            CreatedAt = DateTime.UtcNow,
         };
         user.PasswordHash = _hasher.HashPassword(user, request.Password);
 
