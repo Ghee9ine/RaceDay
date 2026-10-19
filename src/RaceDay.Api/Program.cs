@@ -23,6 +23,8 @@ builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IEnrolmentService, EnrolmentService>();
 builder.Services.AddScoped<IResultService, ResultService>();
+builder.Services.AddScoped<IRouteService, RouteService>();
+builder.Services.AddScoped<IWeatherService, WeatherService>();
 
 // Server-side session: login writes UserId/Role in here, and
 // SessionAuthenticationHandler reads them back out to build the
