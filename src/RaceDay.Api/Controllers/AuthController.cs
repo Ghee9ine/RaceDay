@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RaceDay.Api.Auth;
 using RaceDay.Api.Dtos.Auth;
@@ -23,6 +24,7 @@ public class AuthController : ControllerBase
     /// <response code="400">Validation failed (including an invalid role or a weak password).</response>
     /// <response code="409">That email is already registered.</response>
     [HttpPost("register")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -50,6 +52,7 @@ public class AuthController : ControllerBase
     /// <response code="200">Authenticated; session cookie set.</response>
     /// <response code="401">Invalid email or password.</response>
     [HttpPost("login")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(LoginRequest request)
@@ -65,5 +68,20 @@ public class AuthController : ControllerBase
         await HttpContext.Session.CommitAsync();
 
         return Ok(new LoginResponse(user.UserId, user.FullName, user.Email, user.Role));
+    }
+
+    /// <summary>Ends the authenticated user's session and clears the session cookie.</summary>
+    /// <response code="204">Session ended.</response>
+    /// <response code="401">No active session.</response>
+    [HttpPost("logout")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Logout()
+    {
+        HttpContext.Session.Clear();
+        await HttpContext.Session.CommitAsync();
+        Response.Cookies.Delete(".RaceDay.Session");
+        return NoContent();
     }
 }
