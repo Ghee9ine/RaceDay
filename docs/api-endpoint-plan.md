@@ -8,12 +8,19 @@ Roles: **None** = public, no token required. **Any** = any authenticated user, e
 checks that the authenticated organiser owns the event/category being modified, not just that
 their role is Organiser.
 
+**Authenticated** means the caller holds a valid `.RaceDay.Session` cookie issued by `POST
+/api/auth/login`. There is no bearer token: the server keeps a session store (keyed by that
+cookie) and writes the caller's `UserId` and `Role` into it at login. Every later request on the
+same session is authenticated from that stored state, not from anything the client sends beyond
+the cookie itself.
+
 ## Authentication
 
 | HTTP Method | Route | Description | Role Required | Request Body | Expected Response |
 |---|---|---|---|---|---|
-| POST | /api/auth/register | Creates a new user account as either an Organiser or a Participant. | None | { fullName, email, password, role, phoneNumber } | 201 Created - user id and role; 400 Bad Request - validation failed; 409 Conflict - email already registered |
-| POST | /api/auth/login | Authenticates a user and issues a JWT for subsequent requests. | None | { email, password } | 200 OK - token, userId, role; 401 Unauthorized - invalid credentials |
+| POST | /api/auth/register | Creates a new user account as either an Organiser or a Participant. Does not log the new user in. | None | { fullName, email, password, role, phoneNumber } | 201 Created - user id and role, with a Location header pointing to /api/users/me; 400 Bad Request - validation failed (including an invalid role); 409 Conflict - email already registered |
+| POST | /api/auth/login | Authenticates a user and starts a server-side session. The session store records the user's id and role; the response sets the `.RaceDay.Session` cookie, which the client must send on every later request. | None | { email, password } | 200 OK - Set-Cookie: .RaceDay.Session, body { userId, fullName, email, role }; 401 Unauthorized - invalid credentials (generic message; does not reveal whether the email exists) |
+| POST | /api/auth/logout | Ends the authenticated user's session and clears the session cookie. | Any | None | 204 No Content; 401 Unauthorized - no active session |
 
 ## User Profile
 
