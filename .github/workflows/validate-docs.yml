@@ -1,8 +1,7 @@
-name: Validate Part 1 Documentation
+name: Validate Repository Structure
 
 on:
   push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -55,5 +54,20 @@ jobs:
             exit 1
           fi
 
+      - name: Check Part 2 solution structure exists
+        run: |
+          if [ ! -f "RaceDay.sln" ]; then
+            echo "::error::Missing RaceDay.sln"
+            exit 1
+          fi
+          if [ ! -d "src/RaceDay.Api" ]; then
+            echo "::error::Missing src/RaceDay.Api"
+            exit 1
+          fi
+          if [ ! -d "tests/RaceDay.Api.Tests" ]; then
+            echo "::error::Missing tests/RaceDay.Api.Tests"
+            exit 1
+          fi
+
       - name: Summary
-        run: echo "All required Part 1 documentation is present."
+        run: echo "All required Part 1 documentation and Part 2 solution structure are present."
