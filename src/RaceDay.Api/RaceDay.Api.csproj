@@ -8,9 +8,11 @@
     <!-- 1591 = "missing XML comment"; suppressed because only public
          controller actions are documented for Swagger, not every member. -->
     <NoWarn>$(NoWarn);1591</NoWarn>
+    <UserSecretsId>raceday-api-f3b2c1a4-9e7d-4b6a-9c2f-1a7e5d9b6c3e</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.22.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

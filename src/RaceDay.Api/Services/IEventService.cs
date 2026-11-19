@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using RaceDay.Api.Dtos.Events;
 
 namespace RaceDay.Api.Services;
@@ -12,4 +13,8 @@ public interface IEventService
     Task<EventDetailResponse> CreateAsync(int organiserId, CreateEventRequest request);
     Task<ServiceResult<EventDetailResponse>> UpdateAsync(int eventId, int organiserId, UpdateEventRequest request);
     Task<ServiceResult<bool>> DeleteAsync(int eventId, int organiserId);
+
+    /// <summary>Uploads and sets the event's banner image, replacing (and deleting) any previous
+    /// one only after the new URL has been saved successfully. Owner only.</summary>
+    Task<ServiceResult<string>> SetBannerAsync(int eventId, int organiserId, IFormFile file, CancellationToken ct);
 }

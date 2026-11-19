@@ -1,0 +1,90 @@
+@model EventDetailDto
+@inject SessionUser CurrentUser
+@{
+    ViewData["Title"] = Model.Name;
+    var weather = ViewBag.Weather as WeatherDto;
+    var statusBadge = new StatusBadgeViewModel("Event", Model.Status);
+}
+<div class="mb-3">
+    <img src="@(string.IsNullOrEmpty(Model.BannerImageUrl) ? $"/img/placeholders/{Model.DisciplineType.ToLowerInvariant()}.svg" : Model.BannerImageUrl)"
+         class="rd-event-banner-lg w-100" alt="@Model.Name" />
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <h1 class="rd-heading h2 mb-0">@Model.Name</h1>
+            <partial name="_StatusBadge" model="statusBadge" />
+        </div>
+        <p class="text-muted">
+            <i class="bi bi-calendar-event"></i> @Model.EventDate.ToString("dddd, dd MMMM yyyy")
+            @if (Model.StartTime is not null) { <span> at @Model.StartTime.Value.ToString("HH:mm")</span> }
+            @if (!string.IsNullOrEmpty(Model.Venue)) { <span> &middot; <i class="bi bi-geo-alt"></i> @Model.Venue@(string.IsNullOrEmpty(Model.Province) ? "" : $", {Model.Province}")</span> }
+        </p>
+        <p class="text-muted small">Organised by @Model.OrganiserName</p>
+
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p>@Model.Description</p>
+        }
+
+        <h2 class="h5 mt-4">Categories</h2>
+        @if (Model.Categories.Length == 0)
+        {
+            <p class="text-muted">No categories have been added for this event yet.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table rd-table align-middle">
+                    <thead><tr><th>Category</th><th>Distance</th><th>Entry fee</th><th>Age group</th><th></th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <tr>
+                            <td>@cat.Name</td>
+                            <td>@cat.DistanceKm.ToString("0.#") km</td>
+                            <td>R@cat.EntryFee.ToString("0.00")</td>
+                            <td>@(cat.AgeGroup ?? "Open")</td>
+                            <td><a asp-action="Leaderboard" asp-route-categoryId="@cat.CategoryId" asp-route-id="@Model.EventId" class="small">Leaderboard</a></td>
+                            <td class="text-end">
+                                @if (CurrentUser.IsParticipant)
+                                {
+                                    <form asp-action="Enrol" method="post" class="d-inline">
+                                        <input type="hidden" name="eventId" value="@Model.EventId" />
+                                        <input type="hidden" name="categoryId" value="@cat.CategoryId" />
+                                        <button type="submit" class="btn btn-primary btn-sm">Enrol</button>
+                                    </form>
+                                }
+                                else if (!CurrentUser.IsAuthenticated)
+                                {
+                                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", new { id = Model.EventId })" class="btn btn-outline-primary btn-sm">Log in to enrol</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card rd-card p-3">
+            <h2 class="h6 text-uppercase text-muted">Weather forecast</h2>
+            @if (weather is null)
+            {
+                <p class="text-muted small mb-0">No weather snapshot available yet.</p>
+            }
+            else
+            {
+                <p class="mb-1 fs-4">@(weather.TemperatureC?.ToString("0.#") ?? "-")&deg;C</p>
+                <p class="text-muted small mb-0">
+                    @(weather.ConditionDescription ?? "Unknown conditions")
+                    @if (weather.WindSpeedKmh is not null) { <span> &middot; Wind @weather.WindSpeedKmh.Value.ToString("0.#") km/h</span> }
+                </p>
+                <p class="text-muted small mb-0">As of @weather.RecordedAt.ToLocalTime().ToString("dd MMM HH:mm")</p>
+            }
+        </div>
+    </div>
+</div>

@@ -69,5 +69,44 @@ jobs:
             exit 1
           fi
 
+      - name: Check Part 3 solution structure exists
+        run: |
+          if [ ! -d "src/RaceDay.Web" ]; then
+            echo "::error::Missing src/RaceDay.Web"
+            exit 1
+          fi
+          if [ ! -d "tests/RaceDay.Web.Tests" ]; then
+            echo "::error::Missing tests/RaceDay.Web.Tests"
+            exit 1
+          fi
+          if [ ! -f "src/RaceDay.Api/Dockerfile" ] || [ ! -f "src/RaceDay.Web/Dockerfile" ]; then
+            echo "::error::Missing one or both Dockerfiles"
+            exit 1
+          fi
+          if [ ! -f "docker-compose.yml" ]; then
+            echo "::error::Missing docker-compose.yml"
+            exit 1
+          fi
+          if [ ! -f ".env.example" ]; then
+            echo "::error::Missing .env.example"
+            exit 1
+          fi
+
+      # Catches the two mistakes that actually leak a secret: committing a
+      # real .env file, or hardcoding an Azure Storage account key/
+      # connection string anywhere in tracked source. Checks git's own
+      # tracked file list, not the working directory, so a locally
+      # untracked .env can never cause a false pass or false fail here.
+      - name: Check for committed secrets
+        run: |
+          if git ls-files | grep -E "(^|/)\.env$"; then
+            echo "::error::A .env file is committed - only .env.example should ever be tracked"
+            exit 1
+          fi
+          if git grep -nIE "AccountKey=" -- . ":(exclude)*.md" ":(exclude)docs/*" ":(exclude).github/workflows/validate-docs.yml"; then
+            echo "::error::Found 'AccountKey=' in tracked source - looks like a real Azure Storage connection string"
+            exit 1
+          fi
+
       - name: Summary
-        run: echo "All required Part 1 documentation and Part 2 solution structure are present."
+        run: echo "All required Part 1/2/3 documentation and solution structure are present, with no committed secrets."

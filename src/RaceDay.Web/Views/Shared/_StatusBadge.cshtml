@@ -1,0 +1,5 @@
+@model StatusBadgeViewModel
+@{
+    var (cssClass, icon, label) = Model.Resolve();
+}
+<span class="rd-badge @cssClass"><i class="bi @icon" aria-hidden="true"></i> @label</span>

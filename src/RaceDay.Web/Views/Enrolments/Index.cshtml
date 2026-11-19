@@ -1,0 +1,54 @@
+@model List<OrganiserEnrolmentDto>
+@{
+    ViewData["Title"] = "Enrolments";
+    int eventId = ViewBag.EventId;
+    var categories = (CategorySummaryDto[])ViewBag.Categories;
+    int? selectedCategoryId = ViewBag.SelectedCategoryId;
+}
+<div class="mb-3">
+    <h1 class="rd-heading h3 mb-0">Enrolments</h1>
+    <p class="text-muted small mb-0">@ViewBag.EventName</p>
+</div>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <input type="hidden" name="eventId" value="@eventId" />
+    <div class="col-md-4">
+        <label class="form-label small">Category</label>
+        <select name="categoryId" class="form-select" onchange="this.form.submit()">
+            <option value="">All categories</option>
+            @foreach (var c in categories)
+            {
+                <option value="@c.CategoryId" selected="@(c.CategoryId == selectedCategoryId)">@c.Name</option>
+            }
+        </select>
+    </div>
+</form>
+
+@if (Model is null || Model.Count == 0)
+{
+    <p class="text-muted">No enrolments for this filter yet.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table rd-table align-middle">
+            <thead><tr><th>Bib</th><th>Participant</th><th>Email</th><th>Category</th><th>Enrolled on</th><th>Status</th></tr></thead>
+            <tbody>
+            @foreach (var e in Model)
+            {
+                var badge = new StatusBadgeViewModel("Enrolment", e.Status);
+                <tr>
+                    <td>@(e.BibNumber ?? "-")</td>
+                    <td>@e.ParticipantName</td>
+                    <td>@e.ParticipantEmail</td>
+                    <td>@e.CategoryName</td>
+                    <td>@e.EnrolmentDate.ToString("dd MMM yyyy")</td>
+                    <td><partial name="_StatusBadge" model="badge" /></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+<a asp-controller="OrganiserEvents" asp-action="Edit" asp-route-id="@eventId" class="btn btn-outline-secondary">Back to event</a>

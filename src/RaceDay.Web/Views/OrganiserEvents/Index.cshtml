@@ -1,0 +1,47 @@
+@model List<MyEventDto>
+@{
+    ViewData["Title"] = "My Events";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="rd-heading h3 mb-0">My events</h1>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Create event</a>
+</div>
+
+@if (Model is null || Model.Count == 0)
+{
+    <div class="text-center text-muted py-5">
+        <i class="bi bi-calendar-plus fs-1"></i>
+        <p class="mt-2">You haven't created any events yet.</p>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table rd-table align-middle">
+            <thead><tr><th>Event</th><th>Discipline</th><th>Date</th><th>Status</th><th>Enrolments</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var e in Model)
+            {
+                var badge = new StatusBadgeViewModel("Event", e.Status);
+                <tr>
+                    <td>@e.Name</td>
+                    <td>@e.DisciplineType</td>
+                    <td>@e.EventDate.ToString("dd MMM yyyy")</td>
+                    <td><partial name="_StatusBadge" model="badge" /></td>
+                    <td>@e.TotalEnrolments</td>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@e.EventId" class="btn btn-outline-primary btn-sm">Manage</a>
+                        <a asp-controller="Categories" asp-action="Index" asp-route-eventId="@e.EventId" class="btn btn-outline-secondary btn-sm">Categories</a>
+                        <a asp-controller="Enrolments" asp-action="Index" asp-route-eventId="@e.EventId" class="btn btn-outline-secondary btn-sm">Enrolments</a>
+                        <a asp-controller="Results" asp-action="Index" asp-route-eventId="@e.EventId" class="btn btn-outline-secondary btn-sm">Results</a>
+                        <form asp-action="Delete" asp-route-id="@e.EventId" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete this event? This cannot be undone.');">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>raceday-web-6b8e2a71-3c9f-4e1a-8d5b-2f6c9a1e7d4b</UserSecretsId>
+  </PropertyGroup>
+
+  <!--
+    Deliberately no PackageReference to EF Core, RaceDay.Api, or any SQL
+    client, and no ProjectReference to the API project. This project is
+    only ever an HTTP client of the API - see Services/Api/RaceDayApiClient.cs
+    and the README's "MVC architecture" section for why its DTOs
+    (Models/Api) are plain records duplicated from the API's own, not
+    shared via a project reference: sharing would let a change to the
+    API's internal DTOs silently ripple into this project without either
+    side's own test suite catching a real wire-format break.
+  -->
+
+</Project>

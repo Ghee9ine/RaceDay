@@ -1,18 +1,22 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.Api.Data;
 using RaceDay.Api.Dtos.Events;
 using RaceDay.Api.Models;
 using RaceDay.Api.Models.Enums;
+using RaceDay.Api.Services.Storage;
 
 namespace RaceDay.Api.Services;
 
 public class EventService : IEventService
 {
     private readonly RaceDayDbContext _db;
+    private readonly IBlobStorageService _blobStorage;
 
-    public EventService(RaceDayDbContext db)
+    public EventService(RaceDayDbContext db, IBlobStorageService blobStorage)
     {
         _db = db;
+        _blobStorage = blobStorage;
     }
 
     public async Task<List<EventSummaryResponse>> GetPublishedAsync(EventFilter filter)
@@ -174,6 +178,41 @@ public class EventService : IEventService
         await transaction.CommitAsync();
 
         return ServiceResult<bool>.Success(true);
+    }
+
+    public async Task<ServiceResult<string>> SetBannerAsync(int eventId, int organiserId, IFormFile file, CancellationToken ct)
+    {
+        var entity = await _db.Events.SingleOrDefaultAsync(e => e.EventId == eventId, ct);
+        if (entity is null)
+        {
+            return ServiceResult<string>.NotFound();
+        }
+        if (entity.OrganiserId != organiserId)
+        {
+            return ServiceResult<string>.Forbidden();
+        }
+
+        var validation = await ImageValidator.ValidateAsync(file);
+        if (!validation.IsValid)
+        {
+            return ServiceResult<string>.ValidationFailed(ImageValidationMessages.For(validation.Outcome));
+        }
+
+        var previousUrl = entity.BannerImageUrl;
+        var blobPath = $"events/{eventId}/{Guid.NewGuid():N}.{validation.Extension}";
+
+        await using var stream = file.OpenReadStream();
+        var url = await _blobStorage.UploadImageAsync(stream, file.ContentType, blobPath, ct);
+
+        entity.BannerImageUrl = url;
+        await _db.SaveChangesAsync(ct);
+
+        // Only delete the old blob once the new URL is safely committed -
+        // if the delete fails or this never runs, the worst outcome is one
+        // orphaned blob, never a lost or inconsistent reference.
+        await _blobStorage.DeleteIfExistsAsync(previousUrl, ct);
+
+        return ServiceResult<string>.Success(url);
     }
 
     private static EventSummaryResponse ToSummary(Event e) => new(

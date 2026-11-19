@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 40" width="150" height="25" role="img" aria-label="RaceDay">
+  <!-- Original wordmark: a stopwatch face (circle + crown button + a single
+       hand) followed by the brand name, built from basic shapes only. -->
+  <g transform="translate(2,4)">
+    <circle cx="14" cy="18" r="14" fill="none" stroke="#C6F432" stroke-width="3"/>
+    <rect x="10" y="-2" width="8" height="5" rx="1.5" fill="#C6F432"/>
+    <rect x="20" y="-1" width="6" height="3" rx="1" fill="#C6F432" transform="rotate(35 20 -1)"/>
+    <line x1="14" y1="18" x2="14" y2="8" stroke="#FF5A1F" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="14" y1="18" x2="20" y2="18" stroke="#FF5A1F" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <text x="38" y="26" font-family="'Barlow Condensed', sans-serif" font-size="24" font-weight="700" letter-spacing="1" fill="#EAF0FA">RACE<tspan fill="#FF5A1F">DAY</tspan></text>
+</svg>

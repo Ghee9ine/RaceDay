@@ -1,0 +1,15 @@
+@model int
+@{
+    var (icon, heading, message) = Model switch
+    {
+        404 => ("bi-signpost-2", "Page not found", "We couldn't find the page you were looking for."),
+        403 => ("bi-shield-lock", "Access denied", "You don't have permission to view that page."),
+        _ => ("bi-exclamation-triangle", "Something went wrong", "An unexpected error occurred. Please try again."),
+    };
+}
+<div class="text-center py-5">
+    <i class="bi @icon display-1 text-muted" aria-hidden="true"></i>
+    <h1 class="rd-heading mt-3">@heading</h1>
+    <p class="text-muted">@message</p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-2">Back to home</a>
+</div>
