@@ -54,4 +54,12 @@ public class EventsController : Controller
 
         return RedirectToAction(nameof(Details), new { id = eventId });
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Leaderboard(int categoryId, int id)
+    {
+        var result = await _api.GetLeaderboardAsync(categoryId);
+        ViewBag.EventId = id;
+        return View(result.Success ? result.Data : new List<Models.Api.LeaderboardEntryDto>());
+    }
 }

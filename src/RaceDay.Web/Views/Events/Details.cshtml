@@ -37,7 +37,7 @@
         {
             <div class="table-responsive">
                 <table class="table rd-table align-middle">
-                    <thead><tr><th>Category</th><th>Distance</th><th>Entry fee</th><th>Age group</th><th></th></tr></thead>
+                    <thead><tr><th>Category</th><th>Distance</th><th>Entry fee</th><th>Age group</th><th></th><th></th></tr></thead>
                     <tbody>
                     @foreach (var cat in Model.Categories)
                     {
@@ -46,6 +46,7 @@
                             <td>@cat.DistanceKm.ToString("0.#") km</td>
                             <td>R@cat.EntryFee.ToString("0.00")</td>
                             <td>@(cat.AgeGroup ?? "Open")</td>
+                            <td><a asp-action="Leaderboard" asp-route-categoryId="@cat.CategoryId" asp-route-id="@Model.EventId" class="small">Leaderboard</a></td>
                             <td class="text-end">
                                 @if (CurrentUser.IsParticipant)
                                 {

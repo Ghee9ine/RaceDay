@@ -46,14 +46,6 @@ public class ResultsController : Controller
         return RedirectToAction(nameof(Index), new { eventId });
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Leaderboard(int categoryId, int eventId)
-    {
-        var result = await _api.GetLeaderboardAsync(categoryId);
-        ViewBag.EventId = eventId;
-        return View(result.Success ? result.Data : new List<LeaderboardEntryDto>());
-    }
-
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Complete(int eventId)

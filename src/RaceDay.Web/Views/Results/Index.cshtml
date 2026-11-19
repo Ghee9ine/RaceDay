@@ -26,7 +26,7 @@
         Leaderboards:
         @foreach (var c in categories)
         {
-            <a asp-action="Leaderboard" asp-route-categoryId="@c.CategoryId" asp-route-eventId="@eventId" class="me-2">@c.Name</a>
+            <a asp-controller="Events" asp-action="Leaderboard" asp-route-categoryId="@c.CategoryId" asp-route-id="@eventId" class="me-2">@c.Name</a>
         }
     </p>
 }
