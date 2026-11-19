@@ -1,0 +1,78 @@
+@model List<OrganiserEnrolmentDto>
+@{
+    ViewData["Title"] = "Results";
+    int eventId = ViewBag.EventId;
+    string eventStatus = ViewBag.EventStatus;
+}
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="rd-heading h3 mb-0">Results</h1>
+        <p class="text-muted small mb-0">@ViewBag.EventName</p>
+    </div>
+    @if (eventStatus != "Completed")
+    {
+        <form asp-action="Complete" asp-route-eventId="@eventId" method="post" onsubmit="return confirm('Mark this event as Completed?');">
+            <button type="submit" class="btn btn-outline-dark btn-sm"><i class="bi bi-flag-fill"></i> Mark event Completed</button>
+        </form>
+    }
+</div>
+
+@{
+    var categories = (CategorySummaryDto[])ViewBag.Categories;
+}
+@if (categories.Length > 0)
+{
+    <p class="small text-muted">
+        Leaderboards:
+        @foreach (var c in categories)
+        {
+            <a asp-action="Leaderboard" asp-route-categoryId="@c.CategoryId" asp-route-eventId="@eventId" class="me-2">@c.Name</a>
+        }
+    </p>
+}
+
+@if (Model is null || Model.Count == 0)
+{
+    <p class="text-muted">No enrolments to capture results for yet.</p>
+}
+else
+{
+    @* Each row's inputs submit via the HTML5 form="" attribute into a
+       hidden <form> rendered alongside the table, since a <form> element
+       cannot itself be a valid child of <tr>/<td>. *@
+    @foreach (var e in Model)
+    {
+        <form id="capture-@e.EnrolmentId" asp-action="Capture" method="post" class="d-none">
+            <input type="hidden" name="enrolmentId" value="@e.EnrolmentId" />
+            <input type="hidden" name="eventId" value="@eventId" />
+        </form>
+    }
+    <div class="table-responsive">
+        <table class="table rd-table align-middle">
+            <thead><tr><th>Bib</th><th>Participant</th><th>Category</th><th>Finish time</th><th>Position</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var e in Model)
+            {
+                var formId = $"capture-{e.EnrolmentId}";
+                <tr>
+                    <td>@(e.BibNumber ?? "-")</td>
+                    <td>@e.ParticipantName</td>
+                    <td>@e.CategoryName</td>
+                    <td><input form="@formId" type="text" name="finishTime" class="form-control form-control-sm" placeholder="HH:MM:SS" pattern="^\d{1,2}:\d{2}(:\d{2})?$" /></td>
+                    <td><input form="@formId" type="number" name="position" class="form-control form-control-sm" min="1" style="width:5rem" /></td>
+                    <td>
+                        <select form="@formId" name="status" class="form-select form-select-sm" style="width:8rem">
+                            <option value="Finished">Finished</option>
+                            <option value="DNF">DNF</option>
+                            <option value="DSQ">DSQ</option>
+                        </select>
+                    </td>
+                    <td><button form="@formId" type="submit" class="btn btn-primary btn-sm">Capture</button></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+<a asp-controller="OrganiserEvents" asp-action="Edit" asp-route-id="@eventId" class="btn btn-outline-secondary">Back to event</a>
