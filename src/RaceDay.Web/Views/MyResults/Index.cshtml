@@ -1,0 +1,36 @@
+@model List<MyResultDto>
+@{
+    ViewData["Title"] = "My Results";
+}
+<h1 class="rd-heading h3 mb-3">My results</h1>
+
+@if (Model is null || Model.Count == 0)
+{
+    <div class="text-center text-muted py-5">
+        <i class="bi bi-trophy fs-1"></i>
+        <p class="mt-2">No results have been captured for you yet.</p>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table rd-table align-middle">
+            <thead><tr><th>Event</th><th>Date</th><th>Category</th><th>Distance</th><th>Finish time</th><th>Position</th><th>Status</th></tr></thead>
+            <tbody>
+            @foreach (var r in Model)
+            {
+                var badge = new StatusBadgeViewModel("Result", r.Status);
+                <tr>
+                    <td>@r.EventName</td>
+                    <td>@r.EventDate.ToString("dd MMM yyyy")</td>
+                    <td>@r.CategoryName</td>
+                    <td>@r.DistanceKm.ToString("0.#") km</td>
+                    <td>@(r.FinishTime?.ToString(@"hh\:mm\:ss") ?? "-")</td>
+                    <td>@(r.Position is null ? "-" : $"{r.Position} of {r.TotalFinishers}")</td>
+                    <td><partial name="_StatusBadge" model="badge" /></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
