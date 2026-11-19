@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using RaceDay.Web.Infrastructure;
 using RaceDay.Web.Services.Api;
 
@@ -9,6 +10,16 @@ builder.Services.AddControllersWithViews(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
+
+// Without this, a container restart silently invalidates every logged-in
+// user's .RaceDay.Web.Session cookie (the cookie value itself is Data
+// Protection-wrapped). Unset locally; set to the mounted /keys volume in
+// docker-compose.yml.
+var dataProtectionKeysPath = builder.Configuration["DataProtection:KeysPath"];
+if (!string.IsNullOrWhiteSpace(dataProtectionKeysPath))
+{
+    builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath));
+}
 
 // Session: this app's OWN session (.RaceDay.Web.Session), distinct from
 // the API's (.RaceDay.Session). Holds UserId/Role/FullName/the API's own

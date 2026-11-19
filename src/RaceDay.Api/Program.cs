@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -88,6 +89,17 @@ builder.Services
     .AddAuthentication(SessionAuthenticationHandler.SchemeName)
     .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>(SessionAuthenticationHandler.SchemeName, options => { });
 builder.Services.AddAuthorization();
+
+// Without this, the session cookie's protection keys live only in the
+// container's memory - a restart (or a rolling redeploy) silently
+// invalidates every logged-in user's session. DataProtection:KeysPath is
+// unset locally (the default in-memory/registry key ring is fine for one
+// dev machine) and set to the mounted /keys volume in docker-compose.yml.
+var dataProtectionKeysPath = builder.Configuration["DataProtection:KeysPath"];
+if (!string.IsNullOrWhiteSpace(dataProtectionKeysPath))
+{
+    builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath));
+}
 
 builder.Services.AddHealthChecks();
 

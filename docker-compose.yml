@@ -1,0 +1,80 @@
+# Single-command run: `docker compose up --build` from the repo root.
+# See README "Running with Docker" for the full walkthrough.
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - raceday-sqldata:/var/opt/mssql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  api:
+    build:
+      context: .
+      dockerfile: src/RaceDay.Api/Dockerfile
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=RaceDay;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True"
+      ConnectionStrings__BlobStorage: ${BLOB_STORAGE_CONNECTION_STRING}
+      Database__MigrateOnStartup: "true"
+      Database__SeedDemoData: "true"
+      Swagger__Enabled: "true"
+      DataProtection__KeysPath: /keys
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    # A named volume, not a bind mount, for Data Protection keys: the
+    # session cookie's protection keys must survive a container restart
+    # or every existing session (and the API session cookie this MVC app
+    # forwards) is silently invalidated on every redeploy.
+    volumes:
+      - raceday-api-keys:/keys
+
+  web:
+    build:
+      context: .
+      dockerfile: src/RaceDay.Web/Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Api__BaseUrl: "http://api:8080/"
+      DataProtection__KeysPath: /keys
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    volumes:
+      - raceday-web-keys:/keys
+
+volumes:
+  raceday-sqldata:
+  raceday-api-keys:
+  raceday-web-keys:
