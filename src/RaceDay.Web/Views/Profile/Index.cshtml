@@ -1,0 +1,54 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+<h1 class="rd-heading h3 mb-3">My profile</h1>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card rd-card p-3 text-center">
+            @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+            {
+                <img src="@Model.ProfilePictureUrl" class="rd-avatar-lg mx-auto mb-3" alt="@Model.FullName" />
+            }
+            else
+            {
+                <div class="rd-avatar-lg mx-auto mb-3 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-person fs-1"></i>
+                </div>
+            }
+            <form asp-action="UploadPicture" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" class="form-control form-control-sm mb-2" accept="image/jpeg,image/png,image/webp" required />
+                <button type="submit" class="btn btn-outline-primary btn-sm w-100">Upload picture</button>
+                <p class="text-muted small mt-1 mb-0">JPEG, PNG or WebP, up to 5MB.</p>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card rd-card p-4">
+            <partial name="_ValidationSummary" />
+            <form asp-action="Index" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input class="form-control" value="@Model.Email" disabled />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Role</label>
+                    <input class="form-control" value="@Model.Role" disabled />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label"></label>
+                    <input asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </form>
+        </div>
+    </div>
+</div>

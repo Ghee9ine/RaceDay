@@ -100,11 +100,55 @@ h1, h2, h3, h4, .rd-heading {
   font-size: 0.85rem;
 }
 
-.rd-event-card .rd-banner {
+.rd-event-card .rd-banner,
+.rd-event-banner {
   height: 160px;
   object-fit: cover;
   border-top-left-radius: var(--rd-radius);
   border-top-right-radius: var(--rd-radius);
+}
+
+.rd-event-banner-lg {
+  height: 280px;
+  object-fit: cover;
+  border-radius: var(--rd-radius);
+}
+
+.rd-avatar-lg {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: var(--rd-sky);
+  color: var(--rd-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rd-card {
+  height: 100%;
+}
+
+.rd-hero {
+  background: linear-gradient(135deg, var(--rd-navy), #16335C);
+  color: #fff;
+  border-radius: var(--rd-radius);
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.rd-hero .text-muted {
+  color: #C9D6EA !important;
+}
+
+.rd-hero-filter {
+  max-width: 900px;
+  color: #1A2433;
+}
+
+.rd-table thead {
+  background-color: var(--rd-sky);
 }
 
 .rd-badge {
