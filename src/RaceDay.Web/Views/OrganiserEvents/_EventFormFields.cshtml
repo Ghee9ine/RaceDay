@@ -1,0 +1,97 @@
+@model EventFormViewModel
+<input type="hidden" asp-for="EventId" />
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger small"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="DisciplineType" class="form-label"></label>
+        <select asp-for="DisciplineType" class="form-select" asp-items="@(new SelectList(DisciplineOptions.All))"></select>
+        <span asp-validation-for="DisciplineType" class="text-danger small"></span>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Description" class="text-danger small"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="EventDate" class="form-label"></label>
+        <input asp-for="EventDate" class="form-control" type="date" />
+        <span asp-validation-for="EventDate" class="text-danger small"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="StartTime" class="form-label"></label>
+        <input asp-for="StartTime" class="form-control" type="time" />
+        <span asp-validation-for="StartTime" class="text-danger small"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Status" class="form-label"></label>
+        <select asp-for="Status" class="form-select">
+            <option value="Draft">Draft</option>
+            <option value="Published">Published</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger small"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Province" class="form-label"></label>
+        <select asp-for="Province" class="form-select" asp-items="@(new SelectList(SouthAfricanProvinces.All))">
+            <option value="">Select a province</option>
+        </select>
+        <span asp-validation-for="Province" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Venue" class="form-label"></label>
+        <input asp-for="Venue" class="form-control" />
+        <span asp-validation-for="Venue" class="text-danger small"></span>
+    </div>
+
+    @if (!Model.IsEdit)
+    {
+        <div class="col-md-6">
+            <label asp-for="MainDistanceKm" class="form-label"></label>
+            <input asp-for="MainDistanceKm" class="form-control" type="number" step="0.1" />
+            <span asp-validation-for="MainDistanceKm" class="text-danger small"></span>
+            <div class="form-text">The event's first category is created automatically from this distance - add more under "Categories" once the event exists.</div>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="CategoryName" class="form-label"></label>
+            <input asp-for="CategoryName" class="form-control" placeholder="e.g. 10km Open" />
+            <span asp-validation-for="CategoryName" class="text-danger small"></span>
+        </div>
+    }
+    else if (Model.ExistingDistancesKm is { Length: > 0 })
+    {
+        <div class="col-12">
+            <span class="text-muted small">Current categories: @string.Join(" / ", Model.ExistingDistancesKm.Select(d => $"{d:0.#}km"))</span>
+        </div>
+    }
+
+    <div class="col-12">
+        <label class="form-label">Banner image</label>
+        <input type="file" name="Banner" class="form-control" accept="image/jpeg,image/png,image/webp" onchange="rdPreviewBanner(this)" />
+        <div class="form-text">JPEG, PNG or WebP, up to 5MB.</div>
+        <img id="rdBannerPreview" class="rd-event-banner mt-2 d-none" alt="Banner preview" />
+    </div>
+</div>
+
+<script>
+    function rdPreviewBanner(input) {
+        var preview = document.getElementById('rdBannerPreview');
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
