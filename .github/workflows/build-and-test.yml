@@ -21,7 +21,10 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build (Release)
+      # RaceDay.sln now includes RaceDay.Web alongside RaceDay.Api, so this
+      # one step already builds the MVC front end too - renamed so that's
+      # obvious from the CI log rather than implied.
+      - name: Build API and Web (Release)
         run: dotnet build --no-restore -c Release
 
       - name: Test (Release)
@@ -33,3 +36,32 @@ jobs:
         with:
           name: test-results
           path: "**/TestResults/test-results.trx"
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build-only, never push: proves both Dockerfiles are actually
+      # buildable from the repo-root context docker-compose.yml uses, with
+      # no registry login and no credentials involved at all.
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/RaceDay.Api/Dockerfile
+          push: false
+          tags: raceday-api:ci
+
+      - name: Build Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/RaceDay.Web/Dockerfile
+          push: false
+          tags: raceday-web:ci
