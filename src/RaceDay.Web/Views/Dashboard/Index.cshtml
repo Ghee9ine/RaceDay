@@ -1,0 +1,80 @@
+@model OrganiserDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<h1 class="rd-heading h3 mb-3">Dashboard</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="rd-kpi-tile">
+            <div class="rd-kpi-value">@Model.TotalEvents</div>
+            <div class="text-muted small">Total events</div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="rd-kpi-tile">
+            <div class="rd-kpi-value">@Model.PublishedEvents</div>
+            <div class="text-muted small">Published</div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="rd-kpi-tile">
+            <div class="rd-kpi-value">@Model.TotalEnrolments</div>
+            <div class="text-muted small">Total enrolments</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <h2 class="h5">Upcoming events</h2>
+        @if (Model.UpcomingEvents.Count == 0)
+        {
+            <p class="text-muted">No upcoming published events.</p>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var e in Model.UpcomingEvents)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>@e.Name</span>
+                        <span class="text-muted small">@e.EventDate.ToString("dd MMM yyyy")</span>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+    <div class="col-lg-7">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="h5">Your events</h2>
+            <a asp-controller="OrganiserEvents" asp-action="Create" class="btn btn-primary btn-sm">Create event</a>
+        </div>
+        @if (Model.RecentEvents.Count == 0)
+        {
+            <p class="text-muted">You haven't created any events yet.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table rd-table align-middle">
+                    <thead><tr><th>Event</th><th>Date</th><th>Status</th><th>Enrolments</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var e in Model.RecentEvents)
+                    {
+                        var badge = new StatusBadgeViewModel("Event", e.Status);
+                        <tr>
+                            <td>@e.Name</td>
+                            <td>@e.EventDate.ToString("dd MMM yyyy")</td>
+                            <td><partial name="_StatusBadge" model="badge" /></td>
+                            <td>@e.TotalEnrolments</td>
+                            <td class="text-end"><a asp-controller="OrganiserEvents" asp-action="Edit" asp-route-id="@e.EventId" class="btn btn-outline-primary btn-sm">Manage</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
