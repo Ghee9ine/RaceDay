@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RaceDay.Api.Auth;
 using RaceDay.Api.Dtos.Events;
+using RaceDay.Api.Dtos.Uploads;
 using RaceDay.Api.Services;
 
 namespace RaceDay.Api.Controllers;
@@ -116,6 +117,33 @@ public class EventsController : ControllerBase
             ServiceOutcome.Forbidden => Forbid(),
             ServiceOutcome.Conflict => Conflict(new { message = "This event already has enrolments and can't be deleted." }),
             _ => NoContent(),
+        };
+    }
+
+    /// <summary>Uploads an event's banner image to Azure Blob Storage and stores its URL. Owner only.</summary>
+    /// <response code="200">The banner's new URL.</response>
+    /// <response code="400">No file, the file is over 5 MB, or its type/content isn't a supported image.</response>
+    /// <response code="403">The caller does not own this event.</response>
+    /// <response code="404">No such event.</response>
+    /// <response code="503">Blob storage is not configured on this deployment.</response>
+    [HttpPost("{id:int}/banner")]
+    [Authorize(Roles = "Organiser")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(5_242_880)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> UploadBanner(int id, [FromForm] ImageUploadRequest request, CancellationToken ct)
+    {
+        var result = await _eventService.SetBannerAsync(id, User.GetUserId(), request.File, ct);
+        return result.Outcome switch
+        {
+            ServiceOutcome.NotFound => NotFound(),
+            ServiceOutcome.Forbidden => Forbid(),
+            ServiceOutcome.ValidationFailed => BadRequest(new { message = result.Error }),
+            _ => Ok(new { bannerImageUrl = result.Value }),
         };
     }
 }
