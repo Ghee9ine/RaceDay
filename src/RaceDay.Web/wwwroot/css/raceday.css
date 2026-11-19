@@ -1,0 +1,153 @@
+/* RaceDay brand theme. One file, used on every page, so colours/type/
+   spacing never drift between screens. See README "UI design". */
+
+:root {
+  --rd-navy: #0B1F3A;
+  --rd-orange: #FF5A1F;
+  --rd-lime: #C6F432;
+  --rd-sky: #E8F1FB;
+  --rd-radius: 0.5rem;
+  --rd-space: 8px;
+
+  /* Override Bootstrap's own look so buttons/links/focus rings match the
+     brand without re-writing every Bootstrap component class by hand. */
+  --bs-primary: var(--rd-orange);
+  --bs-primary-rgb: 255, 90, 31;
+  --bs-link-color: var(--rd-navy);
+  --bs-link-hover-color: var(--rd-orange);
+  --bs-body-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--bs-body-font-family);
+  background-color: #F6F8FB;
+  color: #1A2433;
+}
+
+h1, h2, h3, h4, .rd-heading {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.rd-hero h1 {
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.navbar.rd-navbar {
+  background-color: var(--rd-navy) !important;
+}
+
+.navbar.rd-navbar .navbar-brand,
+.navbar.rd-navbar .nav-link {
+  color: #EAF0FA !important;
+}
+
+.navbar.rd-navbar .nav-link.active {
+  color: var(--rd-lime) !important;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background-color: var(--rd-orange);
+  border-color: var(--rd-orange);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #e24e16;
+  border-color: #e24e16;
+}
+
+.card {
+  border-radius: var(--rd-radius);
+  box-shadow: 0 1px 3px rgba(11, 31, 58, 0.08);
+  border: 1px solid rgba(11, 31, 58, 0.08);
+}
+
+.rd-role-pill {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.rd-role-pill.organiser {
+  background-color: var(--rd-orange);
+  color: #fff;
+}
+
+.rd-role-pill.participant {
+  background-color: #1FA3A3;
+  color: #fff;
+}
+
+.rd-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: var(--rd-sky);
+  color: var(--rd-navy);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.rd-event-card .rd-banner {
+  height: 160px;
+  object-fit: cover;
+  border-top-left-radius: var(--rd-radius);
+  border-top-right-radius: var(--rd-radius);
+}
+
+.rd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+}
+
+.rd-badge-green { background-color: #E3F7E8; color: #1C7A33; }
+.rd-badge-amber { background-color: #FFF3DB; color: #92600B; }
+.rd-badge-grey { background-color: #ECEEF1; color: #5B6472; text-decoration: line-through; }
+.rd-badge-blue { background-color: #E2ECFC; color: #1A4FB5; }
+.rd-badge-outline { background-color: #fff; color: #5B6472; border: 1px solid #C9CFD7; }
+.rd-badge-dark { background-color: #1A2433; color: #fff; }
+.rd-badge-red { background-color: #FBE3E3; color: #A4201F; }
+
+.rd-kpi-tile {
+  border-radius: var(--rd-radius);
+  background: #fff;
+  border: 1px solid rgba(11, 31, 58, 0.08);
+  padding: 1.1rem 1.3rem;
+}
+
+.rd-kpi-tile .rd-kpi-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--rd-navy);
+}
+
+.rd-toast-stack {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1080;
+}
+
+@media (max-width: 575.98px) {
+  .rd-kpi-tile .rd-kpi-value {
+    font-size: 1.5rem;
+  }
+}

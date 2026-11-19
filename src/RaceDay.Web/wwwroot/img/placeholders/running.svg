@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 160" width="400" height="160" role="img" aria-label="Running event placeholder banner" preserveAspectRatio="xMidYMid slice">
+  <rect width="400" height="160" fill="#0B1F3A"/>
+  <g stroke="#FF5A1F" stroke-width="28" opacity="0.9">
+    <line x1="-20" y1="200" x2="200" y2="-20"/>
+    <line x1="60" y1="200" x2="280" y2="-20"/>
+    <line x1="140" y1="200" x2="360" y2="-20"/>
+  </g>
+  <g stroke="#C6F432" stroke-width="10" opacity="0.8">
+    <line x1="220" y1="200" x2="440" y2="-20"/>
+  </g>
+  <!-- simple running figure -->
+  <g transform="translate(300,70)" stroke="#EAF0FA" stroke-width="6" stroke-linecap="round" fill="none">
+    <circle cx="10" cy="-30" r="8" fill="#EAF0FA" stroke="none"/>
+    <path d="M10,-20 L2,10 M2,10 L-14,24 M2,10 L18,6 M18,6 L30,-10 M10,-20 L26,-16 M26,-16 L36,-28"/>
+  </g>
+</svg>

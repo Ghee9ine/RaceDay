@@ -1,0 +1,28 @@
+@inject SessionUser CurrentUser
+<ul class="navbar-nav ms-auto align-items-lg-center">
+    <li class="nav-item"><a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link" asp-controller="OrganiserEvents" asp-action="Index">My Events</a></li>
+    <li class="nav-item"><a class="nav-link" asp-controller="OrganiserEvents" asp-action="Create">Create Event</a></li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+            @if (!string.IsNullOrEmpty(CurrentUser.ProfilePictureUrl))
+            {
+                <img src="@CurrentUser.ProfilePictureUrl" class="rd-avatar" alt="@CurrentUser.FullName" />
+            }
+            else
+            {
+                <span class="rd-avatar">@CurrentUser.Initials</span>
+            }
+            <span class="rd-role-pill organiser">Organiser</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" asp-controller="Profile" asp-action="Index">Profile</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="dropdown-item">Log out</button>
+                </form>
+            </li>
+        </ul>
+    </li>
+</ul>
