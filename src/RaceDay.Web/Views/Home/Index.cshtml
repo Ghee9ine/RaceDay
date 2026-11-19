@@ -1,0 +1,72 @@
+@model EventFilterViewModel
+@{
+    ViewData["Title"] = "Find your next race";
+}
+<div class="rd-hero text-center py-5 mb-4">
+    <h1 class="rd-heading display-5">South African road running, walking and cycling events</h1>
+    <p class="lead text-muted">Find a race, enrol, and get your results - all in one place.</p>
+
+    <form asp-controller="Events" asp-action="Index" method="get" class="rd-hero-filter card rd-card p-3 mt-4 mx-auto">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label asp-for="DisciplineType" class="form-label small">Discipline</label>
+                <select asp-for="DisciplineType" class="form-select">
+                    <option value="">Any</option>
+                    @foreach (var d in DisciplineOptions.All)
+                    {
+                        <option value="@d">@d</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Province" class="form-label small">Province</label>
+                <select asp-for="Province" class="form-select">
+                    <option value="">Any</option>
+                    @foreach (var p in SouthAfricanProvinces.All)
+                    {
+                        <option value="@p">@p</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label asp-for="From" class="form-label small">From</label>
+                <input asp-for="From" class="form-control" type="date" />
+            </div>
+            <div class="col-md-2">
+                <label asp-for="To" class="form-label small">To</label>
+                <input asp-for="To" class="form-control" type="date" />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Search</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card rd-card h-100 text-center p-4">
+            <i class="bi bi-flag-fill fs-1 text-primary"></i>
+            <h2 class="h5 mt-2">Running</h2>
+            <p class="text-muted small mb-0">From park runs to ultra marathons.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card rd-card h-100 text-center p-4">
+            <i class="bi bi-bicycle fs-1 text-primary"></i>
+            <h2 class="h5 mt-2">Cycling</h2>
+            <p class="text-muted small mb-0">Road and gravel cycling events.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card rd-card h-100 text-center p-4">
+            <i class="bi bi-person-walking fs-1 text-primary"></i>
+            <h2 class="h5 mt-2">Walking</h2>
+            <p class="text-muted small mb-0">Charity walks and fun runs for everyone.</p>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a asp-controller="Events" asp-action="Index" class="btn btn-outline-primary">Browse all events <i class="bi bi-arrow-right"></i></a>
+</div>

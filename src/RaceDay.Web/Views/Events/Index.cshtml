@@ -1,0 +1,71 @@
+@model List<EventSummaryDto>
+@{
+    ViewData["Title"] = "Events";
+    var filter = (EventFilterViewModel)ViewBag.Filter;
+}
+<h1 class="rd-heading h3 mb-3">Upcoming events</h1>
+
+<form asp-action="Index" method="get" class="card rd-card p-3 mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small">Discipline</label>
+            <select name="DisciplineType" class="form-select" asp-items="@(new SelectList(DisciplineOptions.All))" asp-for="@filter.DisciplineType">
+                <option value="">Any</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small">Province</label>
+            <select name="Province" class="form-select" asp-items="@(new SelectList(SouthAfricanProvinces.All))" asp-for="@filter.Province">
+                <option value="">Any</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">From</label>
+            <input name="From" class="form-control" type="date" value="@filter.From" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">To</label>
+            <input name="To" class="form-control" type="date" value="@filter.To" />
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </div>
+</form>
+
+@if (Model is null || Model.Count == 0)
+{
+    <div class="text-center text-muted py-5">
+        <i class="bi bi-calendar-x fs-1"></i>
+        <p class="mt-2">No events match those filters yet. Try widening your search.</p>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var ev in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card rd-card h-100">
+                    <img src="@(string.IsNullOrEmpty(ev.BannerImageUrl) ? $"/img/placeholders/{ev.DisciplineType.ToLowerInvariant()}.svg" : ev.BannerImageUrl)"
+                         class="card-img-top rd-event-banner" alt="@ev.Name" />
+                    <div class="card-body">
+                        <h2 class="h5 mb-1">@ev.Name</h2>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-calendar-event"></i> @ev.EventDate.ToString("dd MMM yyyy")
+                            @if (!string.IsNullOrEmpty(ev.Province)) { <span> &middot; <i class="bi bi-geo-alt"></i> @ev.Province</span> }
+                        </p>
+                        <span class="rd-badge rd-badge-outline">@ev.DisciplineType</span>
+                        @if (ev.DistancesKm.Length > 0)
+                        {
+                            <span class="text-muted small ms-2">@string.Join(" / ", ev.DistancesKm.Select(d => $"{d:0.#}km"))</span>
+                        }
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pt-0">
+                        <a asp-action="Details" asp-route-id="@ev.EventId" class="btn btn-outline-primary btn-sm w-100">View event</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
