@@ -1,0 +1,47 @@
+@model List<CategoryDto>
+@{
+    ViewData["Title"] = "Categories";
+    int eventId = ViewBag.EventId;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="rd-heading h3 mb-0">Categories</h1>
+        <p class="text-muted small mb-0">@ViewBag.EventName</p>
+    </div>
+    <a asp-action="Create" asp-route-eventId="@eventId" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add category</a>
+</div>
+
+@if (Model is null || Model.Count == 0)
+{
+    <p class="text-muted">No categories yet.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table rd-table align-middle">
+            <thead><tr><th>Name</th><th>Distance</th><th>Entry fee</th><th>Max participants</th><th>Age group</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.Name</td>
+                    <td>@c.DistanceKm.ToString("0.#") km</td>
+                    <td>R@c.EntryFee.ToString("0.00")</td>
+                    <td>@(c.MaxParticipants?.ToString() ?? "Unlimited")</td>
+                    <td>@(c.AgeGroup ?? "Open")</td>
+                    <td class="text-end">
+                        <a asp-action="Route" asp-route-categoryId="@c.CategoryId" class="btn btn-outline-secondary btn-sm">Route</a>
+                        <a asp-action="Edit" asp-route-id="@c.CategoryId" class="btn btn-outline-primary btn-sm">Edit</a>
+                        <form asp-action="Delete" asp-route-id="@c.CategoryId" asp-route-eventId="@eventId" method="post" class="d-inline"
+                              onsubmit="return confirm('Remove this category?');">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+<a asp-controller="OrganiserEvents" asp-action="Edit" asp-route-id="@eventId" class="btn btn-outline-secondary mt-2">Back to event</a>
