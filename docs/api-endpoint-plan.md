@@ -28,7 +28,7 @@ the cookie itself.
 |---|---|---|---|---|---|
 | GET | /api/users/me | Returns the profile of the currently authenticated user, including their profile picture URL once set. | Any | None | 200 OK - { userId, fullName, email, role, phoneNumber, profilePictureUrl, createdAt }; 401 Unauthorized |
 | PUT | /api/users/me | Updates the authenticated user's own profile details. | Any | { fullName, phoneNumber } | 200 OK - updated profile; 400 Bad Request |
-| POST | /api/users/me/profile-picture | **Implemented in Part 3.** Uploads the authenticated user's profile picture to Azure Blob Storage and stores its URL. | Any | multipart/form-data file | 200 OK - { profilePictureUrl }; 400 Bad Request; 401 Unauthorized |
+| POST | /api/users/me/profile-picture | **Added in Part 3.** Uploads the authenticated user's profile picture to Azure Blob Storage and stores its URL. | Any | multipart/form-data file | 200 OK - { profilePictureUrl }; 400 Bad Request - no file, the file is over 5 MB, or its type/content isn't a supported image; 401 Unauthorized; 503 Service Unavailable - storage not configured |
 
 ## Events
 
@@ -46,7 +46,7 @@ its categories. "Location" in the brief maps to `Province` + `Venue`; "event typ
 | POST | /api/events | Creates a new event owned by the authenticated organiser. The organiser id is taken from the session, never the request body. Defaults to Published if `status` is omitted. | Organiser | { name, description, disciplineType, eventDate, startTime, province, venue, status? } | 201 Created - new event; 400 Bad Request |
 | PUT | /api/events/{id} | Updates an existing event's details. | Organiser (owner) | { name, description, disciplineType, eventDate, startTime, province, venue, status } | 200 OK - updated event; 403 Forbidden - not the owner; 404 Not Found |
 | DELETE | /api/events/{id} | Deletes an event and its categories (and their routes), provided no enrolments exist in any of its categories. | Organiser (owner) | None | 204 No Content; 403 Forbidden; 404 Not Found; 409 Conflict - event already has enrolments |
-| POST | /api/events/{id}/banner | **Implemented in Part 3.** Uploads an event's banner image to Azure Blob Storage and stores its URL. | Organiser (owner) | multipart/form-data file | 200 OK - { bannerImageUrl }; 403 Forbidden; 404 Not Found |
+| POST | /api/events/{id}/banner | **Added in Part 3.** Uploads an event's banner image to Azure Blob Storage and stores its URL. | Organiser (owner) | multipart/form-data file | 200 OK - { bannerImageUrl }; 400 Bad Request - no file, the file is over 5 MB, or its type/content isn't a supported image; 403 Forbidden; 404 Not Found; 503 Service Unavailable - storage not configured |
 
 ## Categories
 
