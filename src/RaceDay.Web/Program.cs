@@ -79,18 +79,26 @@ app.UseRouting();
 // Authenticated pages must never be served from the back/forward cache -
 // logging out must actually hide a protected page from history, not just
 // redirect away from it once.
+//
+// Set the header after the pipeline runs, not via Response.OnStarting:
+// a request that WRITES to the session during its own handling (login,
+// which calls Session.SetInt32 then redirects) throws
+// "Session has not been configured for this application or request" if
+// Session is read from inside an OnStarting callback for that same
+// request - SessionMiddleware's own OnStarting-based commit appears to
+// have already torn the feature down by the time a later-registered
+// OnStarting callback fires for a response that was still being written
+// to session this late. Reading it synchronously right after `next()`
+// returns, before the response has started, avoids that entirely and
+// still sees the just-set session values.
 app.Use(async (context, next) =>
 {
-    context.Response.OnStarting(() =>
-    {
-        if (context.Session.GetInt32(SessionKeys.UserId) is not null)
-        {
-            context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
-            context.Response.Headers.Pragma = "no-cache";
-        }
-        return Task.CompletedTask;
-    });
     await next();
+    if (!context.Response.HasStarted && context.Session.GetInt32(SessionKeys.UserId) is not null)
+    {
+        context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+        context.Response.Headers.Pragma = "no-cache";
+    }
 });
 
 app.MapControllerRoute(
