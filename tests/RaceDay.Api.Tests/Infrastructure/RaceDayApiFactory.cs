@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RaceDay.Api.Data;
 using RaceDay.Api.Models;
 using RaceDay.Api.Models.Enums;
+using RaceDay.Api.Services.Storage;
 
 namespace RaceDay.Api.Tests.Infrastructure;
 
@@ -45,6 +46,10 @@ public class RaceDayApiFactory : WebApplicationFactory<Program>
     public const string ParticipantAEmail = "participantA@test.raceday.local";
     public const string ParticipantBEmail = "participantB@test.raceday.local";
 
+    /// <summary>The single FakeBlobStorageService instance this factory registered, so a test can
+    /// inspect what was uploaded/deleted after making an HTTP call.</summary>
+    public FakeBlobStorageService BlobStorage { get; } = new();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
@@ -59,6 +64,19 @@ public class RaceDayApiFactory : WebApplicationFactory<Program>
 
             _connection.Open();
             services.AddDbContext<RaceDayDbContext>(options => options.UseSqlite(_connection));
+
+            // Program.cs registers IBlobStorageService as a singleton
+            // (real or NotConfigured); removing whatever was registered and
+            // adding this factory's own FakeBlobStorageService instance
+            // means every upload test runs against the real controller/
+            // service code path with no Azure account, and can assert on
+            // exactly what was recorded.
+            var blobDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IBlobStorageService));
+            if (blobDescriptor is not null)
+            {
+                services.Remove(blobDescriptor);
+            }
+            services.AddSingleton<IBlobStorageService>(BlobStorage);
 
             using var scope = services.BuildServiceProvider().CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<RaceDayDbContext>();
